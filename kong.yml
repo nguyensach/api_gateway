@@ -1,0 +1,116 @@
+# ------------------------------------------------------------------------------
+# This is an example file to get you started with using
+# declarative configuration in Kong.
+# ------------------------------------------------------------------------------
+
+# Metadata fields start with an underscore (_)
+# Fields that do not start with an underscore represent Kong entities and attributes
+
+# _format_version is mandatory,
+# it specifies the minimum version of Kong that supports the format
+
+_format_version: "1.1"
+
+# Each Kong entity (core entity or custom entity introduced by a plugin)
+# can be listed in the top-level as an array of objects:
+
+services:
+- name: evora
+  host: docker.for.mac.localhost
+  port: 6431
+  routes:
+  - name: evora-route
+    paths:
+    - /evora
+  plugins:
+  - name: oidc
+    config:
+      client_id: 598a1fd1ad0fc2476e1948688779df99331cb9db5eacedb15eea4a52985ae8a5
+      client_secret: 6af6d49ac5245ce0f8bfdd8ff7c0149259bf71133cbd494ca2e98c1641334f86
+      discovery: http://docker.for.mac.localhost:3000/.well-known/openid-configuration
+      introspection_endpoint: http://docker.for.mac.localhost:3000/oauth/introspect
+      introspection_endpoint_auth_method: bearer_token
+      bearer_only: "yes" # the request must be introspected to go further
+      redis_host: docker.for.mac.localhost
+      redis_port: 6379
+      redis_password: ""
+      redis_max_idle_time: 20000 # 20s 
+      redis_conn_pool_size: 3
+      redis_timeout: 1000
+      redis_database: 0
+  - name: kong-url-rewrite
+    config:
+      simple_urls: ["/asset_classes"]
+  # - name: rate-limiting
+  #   config:
+  #     second: 90
+  #     policy: local
+  #     redis_host: docker.for.mac.localhost
+#   - name: key-auth
+
+# - name: chalin
+#   url: http://docker.for.mac.localhost:3001
+#   routes:
+#   - name: chalin-route
+#     paths:
+#     - /chalin
+
+# consumers:
+# - username: evora-user
+#   keyauth_credentials:
+#   - key: evora-key
+
+
+# services:
+# - name: example-service
+#   url: http://example.com
+#   # Entities can store tags as metadata
+#   tags:
+#   - example
+#   # Entities that have a foreign-key relationship can be nested:
+#   routes:
+#   - name: example-route
+#     paths:
+#     - /
+#   plugins:
+#   - name: key-auth
+# - name: another-service
+#   url: https://example.org
+
+# routes:
+# - name: another-route
+#   # Relationships can also be specified between top-level entities,
+#   # either by name or by id
+#   service: example-service
+#   hosts: ["hello.com"]
+
+# consumers:
+# - username: example-user
+#   # Custom entities from plugin can also be specified
+#   # If they specify a foreign-key relationshp, they can also be nested
+#   keyauth_credentials:
+#   - key: my-key
+#   plugins:
+#   - name: rate-limiting
+#     _comment: "these are default rate-limits for user example-user"
+#     config:
+#       policy: local
+#       second: 5
+#       hour: 10000
+
+# When an entity has multiple foreign-key relationships
+# (e.g. a plugin matching on both consumer and service)
+# it must be specified as a top-level entity, and not through
+# nesting.
+
+# plugins:
+# - name: rate-limiting
+#   consumer: example-user
+#   service: another-service
+#   _comment: "example-user is extra limited when using another-service"
+#   config:
+#     hour: 2
+#   # tags are for your organization only and have no meaning for Kong:
+#   tags:
+#   - extra_limits
+#   - my_tag
